@@ -80,6 +80,7 @@ function CharDungList() {
     const [selectedChar, setSelectedChar] = useState(null)
     const [selectedDung, setSelectedDung] = useState(null)
     const [selectedStasis, setSelectedStasis] = useState(1)
+    const [debug, setDebug] = useState("")
 
     useEffect(() => {
         async function fetchData() {
@@ -107,8 +108,9 @@ function CharDungList() {
         setShowAddCharacter(true)
     }
 
-    const addCharacter = (chrt, dng, sta) => {
-        insertCharacterDungeon(sta, chrt, dng)
+    const addCharacter = async (chrt, dng, sta) => {
+        const result = await insertCharacterDungeon(sta, chrt, dng)
+        setDebug(result)
         setShowAddCharacter(false)
     }
 
@@ -149,6 +151,7 @@ function CharDungList() {
                     </div>
                 </div>
             )}
+            <p>{debug[0]}</p>
 
             <h2 className="text-white text-2xl mb-2">Mazmorras Franja 200</h2>
 
