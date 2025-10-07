@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
-import { TablesDB } from "appwrite"
+import { ID, TablesDB } from "appwrite"
 import { appwriteAccount, appwriteClient } from "../service/appwriteConnection"
 import CustomSelector from "./CustomSelector"
 
@@ -23,6 +23,13 @@ async function getDungeonsDone() {
 
 async function getCharacters() {
     return await database.listRows({databaseId: "68dea035000c4960bb99", tableId: "personajes"})
+        .catch((error) => {
+            throw new Error(error)
+        })
+}
+
+async function insertCharacterDungeon(stasisLevel, character, dungeon) {
+    return await database.createRow({databaseId: "68dea035000c4960bb99", tableId: "mazmorra_personaje", rowId: ID.unique, data: {Stasis: stasis, personaje: character.$id, mazmorra: dungeon.$id}})
         .catch((error) => {
             throw new Error(error)
         })
@@ -101,7 +108,7 @@ function CharDungList() {
     }
 
     const addCharacter = (chrt, dng, sta) => {
-
+        insertCharacterDungeon(sta, chrt, dng)
         setShowAddCharacter(false)
     }
 
@@ -129,7 +136,7 @@ function CharDungList() {
 
             {showAddCharacter && (
                 <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50">
-                    <div className="bg-[#333] p-6 rounded-lg shadow-lg sm:w-[90vw] md:w-96 lg:w-120">
+                    <div className="bg-[#333] p-6 rounded-lg shadow-lg w-120">
                         <h3 className="text-white text-lg mb-4" onClick={() => { console.log(selectedDung, selectedChar, selectedStasis) }}>Añadir run</h3>
                         <div className="flex gap-1">
                             <CustomSelector options={dungeons} selected={selectedDung} onSelect={setSelectedDung} labelKey="nombre" placeholder="Mazmorra" />
