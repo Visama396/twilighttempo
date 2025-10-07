@@ -145,7 +145,7 @@ function CharDungList() {
                             <CustomSelector options={characters} selected={selectedChar} onSelect={setSelectedChar} labelKey="nombre" placeholder="Personaje" />
                             <CustomSelector options={Array.from({ length: 10 }, (_, i) => i + 1)} selected={selectedStasis} onSelect={setSelectedStasis} placeholder="Stasis" getColor={(stasis) => { StasisLevelColor(stasis) }} />
                         </div>
-                        <button className="mt-4 px-3 py-1 bg-blue-600 rounded-md text-white cursor-pointer" onClick={addCharacter}>
+                        <button className="mt-4 px-3 py-1 bg-blue-600 rounded-md text-white cursor-pointer" onClick={() => {addCharacter(selectedStasis, selectedChar, selectedDung)}}>
                             Confirmar
                         </button>
                     </div>
