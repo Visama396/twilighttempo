@@ -129,7 +129,7 @@ function CharDungList() {
 
             {showAddCharacter && (
                 <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50">
-                    <div className="bg-[#333] p-6 rounded-lg shadow-lg w-120">
+                    <div className="bg-[#333] p-6 rounded-lg shadow-lg sm:w-[90vw] md:w-96 lg:w-120">
                         <h3 className="text-white text-lg mb-4" onClick={() => { console.log(selectedDung, selectedChar, selectedStasis) }}>Añadir run</h3>
                         <div className="flex gap-1">
                             <CustomSelector options={dungeons} selected={selectedDung} onSelect={setSelectedDung} labelKey="nombre" placeholder="Mazmorra" />
