@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
-import { ID, TablesDB } from "appwrite"
+import { ID, Query, TablesDB } from "appwrite"
 import { appwriteAccount, appwriteClient } from "../service/appwriteConnection"
 import CustomSelector from "./CustomSelector"
 
@@ -22,7 +22,7 @@ async function getDungeonsDone() {
 }
 
 async function getCharacters() {
-    return await database.listRows({databaseId: "68dea035000c4960bb99", tableId: "personajes"})
+    return await database.listRows({databaseId: "68dea035000c4960bb99", tableId: "personajes", queries: [Query.limit(50)]})
         .catch((error) => {
             throw new Error(error)
         })
@@ -61,15 +61,6 @@ function StasisLevelColor (level) {
     return color
 }
 
-function GetTextColor(rgbString) {
-    const match = rgbString.match(/\d+/g)
-    if (!match) return "black"
-
-    const [r, g, b] = match.map(Number)
-    const lumi = 0.299 * r + 0.587 * g + 0.114 * b
-    return lumi > 150 ? "black" : "white"
-}
-
 function CharDungList() {
 
     const [dungeons, setDungeons] = useState([])
@@ -100,9 +91,11 @@ function CharDungList() {
                 setLoading(false)
             }
         }
+        const total = dungeonsDone.reduce((acc, dd) => acc + dd.stasis, 0)
+        setEndMonthReward(total)
 
         fetchData()
-    }, [])
+    }, [dungeonsDone])
 
     const showModal = () => {
         setShowAddCharacter(true)
@@ -167,21 +160,36 @@ function CharDungList() {
 
                     return (
                         <article className="p-3 bg-[#333] rounded-md shadow-sm shadow-white border border-gray-700" key={dung.$id}>
-                            <h3 className="text-white text-lg font-semibold mb-1">{dung.nombre}</h3>
+                            <h3 className="text-white text-2xl font-semibold mb-1">{dung.nombre}</h3>
 
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                                 {completadas.length > 0 ? (
-                                    completadas.map((dd) => {
-                                        const char = characters.find((c) => c.$id === dd.personaje)
+                                    <div className="flex flex-wrap gap-2">
+                                        {completadas.map((dd) => {
+                                            const char = characters.find((c) => c.$id === dd.personaje)
+                                            
+                                            return (
+                                                <div key={dd.$id} className="flex gap-2 px-2 py-1 rounded-md font-semibold bg-emerald-400/80 items-center">
+                                                    <span className="inline-block size-3 rounded-full" style={{backgroundColor: StasisLevelColor(dd.stasis)}}></span>
+                                                    <span className="text-white">{char.nombre}</span>
+                                                </div>
+                                            )
+                                        })}
 
-                                        return (
-                                            <span key={dd.$id} className="px-1 rounded-md text-sm font-semibold bg-emerald-500">
-                                                <span className="w-5 h-5 rounded-full" style={{backgroundColor: StasisLevelColor(dd.stasis)}}></span>
-                                                {char ? char.nombre : "Desconocido"}{" "}
-                                            </span>
-                                        )
-                                    })
-                                ) : (<p className="text-gray-400 text-sm">No hemos hecho esta mazmorra aún</p>)}
+                                        {characters.filter((char) => !completadas.some((dd) => dd.personaje === char.$id)).map((char) => (
+                                            <div key={char.$id} className="flex px-2 py-1 rounded-md font-semibold bg-red-500/70">
+                                                <span className="text-white">{char.nombre}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                ) : (
+                                    characters.map((char)=> (
+                                        <div key={char.$id} className="flex px-2 py-1 rounded-md font-semibold bg-red-500/70">
+                                            <span className="text-white">{char.nombre}</span>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </article>
                     )
