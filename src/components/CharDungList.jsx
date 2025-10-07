@@ -29,7 +29,7 @@ async function getCharacters() {
 }
 
 async function insertCharacterDungeon(stasisLevel, character, dungeon) {
-    return await database.createRow({databaseId: "68dea035000c4960bb99", tableId: "mazmorra_personaje", rowId: ID.unique, data: {Stasis: stasis, personaje: character.$id, mazmorra: dungeon.$id}})
+    return database.createRow({databaseId: "68dea035000c4960bb99", tableId: "mazmorra_personaje", rowId: ID.unique(), data: {stasis: stasisLevel, personaje: character.$id, mazmorra: dungeon.$id}})
         .catch((error) => {
             throw new Error(error)
         })
@@ -79,8 +79,7 @@ function CharDungList() {
     const [showAddCharacter, setShowAddCharacter] = useState(false)
     const [selectedChar, setSelectedChar] = useState(null)
     const [selectedDung, setSelectedDung] = useState(null)
-    const [selectedStasis, setSelectedStasis] = useState(1)
-    const [debug, setDebug] = useState("nada en debug")
+    const [selectedStasis, setSelectedStasis] = useState(null)
 
     useEffect(() => {
         async function fetchData() {
@@ -108,9 +107,8 @@ function CharDungList() {
         setShowAddCharacter(true)
     }
 
-    const addCharacter = async (chrt, dng, sta) => {
+    const addCharacter = async (sta, chrt, dng) => {
         const result = await insertCharacterDungeon(sta, chrt, dng)
-        setDebug(result ? "algo en debug " + result : "nada")
         setShowAddCharacter(false)
     }
 
@@ -138,20 +136,19 @@ function CharDungList() {
 
             {showAddCharacter && (
                 <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50">
-                    <div className="bg-[#333] p-6 rounded-lg shadow-lg w-120">
-                        <h3 className="text-white text-lg mb-4" onClick={() => { console.log(selectedDung, selectedChar, selectedStasis) }}>Añadir run</h3>
+                    <div className="bg-[#333] p-6 rounded-lg shadow-lg sm:w-[90%] md:w-96 lg:w-140">
+                        <h3 className="text-white text-lg mb-4" onClick={() => { console.log(selectedDung, selectedChar, typeof selectedStasis, selectedStasis) }}>Añadir run</h3>
                         <div className="flex gap-1">
                             <CustomSelector options={dungeons} selected={selectedDung} onSelect={setSelectedDung} labelKey="nombre" placeholder="Mazmorra" />
                             <CustomSelector options={characters} selected={selectedChar} onSelect={setSelectedChar} labelKey="nombre" placeholder="Personaje" />
-                            <CustomSelector options={Array.from({ length: 10 }, (_, i) => i + 1)} selected={selectedStasis} onSelect={setSelectedStasis} placeholder="Stasis" getColor={(stasis) => { StasisLevelColor(stasis) }} />
+                            <CustomSelector options={Array.from({ length: 10 }, (_, i) => i + 1)} selected={selectedStasis} onSelect={setSelectedStasis} placeholder="Stasis" getColor={(n) => { return StasisLevelColor(n) }} />
                         </div>
-                        <button className="mt-4 px-3 py-1 bg-blue-600 rounded-md text-white cursor-pointer" onClick={() => {addCharacter(selectedStasis, selectedChar, selectedDung)}}>
+                        <button className="mt-4 px-3 py-1 bg-blue-600 rounded-md text-white cursor-pointer" onClick={() => { addCharacter(selectedStasis, selectedChar, selectedDung)}}>
                             Confirmar
                         </button>
                     </div>
                 </div>
             )}
-            <p>{debug[0]}</p>
 
             <h2 className="text-white text-2xl mb-2">Mazmorras Franja 200</h2>
 
@@ -171,8 +168,8 @@ function CharDungList() {
                                         return (
                                             <p key={dd.$id} className="text-white">
                                                 {char ? char.nombre : "Desconocido"}{" "}
-                                                <span className="px-1 rounded-md text-sm font-semibold" style={{backgroundColor: StasisLevelColor(dd.Stasis), color: GetTextColor(StasisLevelColor(dd.Stasis))}}>
-                                                    S{dd.Stasis}
+                                                <span className="px-1 rounded-md text-sm font-semibold" style={{backgroundColor: StasisLevelColor(dd.stasis), color: GetTextColor(StasisLevelColor(dd.stasis))}}>
+                                                    S{dd.stasis}
                                                 </span>
                                             </p>
                                         )

@@ -11,7 +11,13 @@ export default function CustomSelector({
     getColor = () => {}
 }) {
     const [open, setOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("")
     const ref = useRef(null)
+    
+    const filteredOptions = options.filter((opt) => {
+        const label = typeof opt === "string" ? opt : opt[labelKey] || ""
+        return label.toLowerCase().includes(searchTerm.toLowerCase())
+    })
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -27,7 +33,7 @@ export default function CustomSelector({
         <div ref={ref} className="relative w-full">
             <button type="button" onClick={() => setOpen(!open)} className="w-full flex justify-between items-center bg-[#2a2a2a] text-white px-4 py-2 rounded-md border-gray-700 hover:border-gray-500 transition">
                 <span>
-                    {selected ? typeof selected === "string" ? selected : selected[labelKey] : placeholder}
+                    {!selected ? placeholder : typeof selected === "string" || typeof selected === "number" ? selected : selected[labelKey] || placeholder}
                 </span>
                 <ChevronDown size={18} className={`transition-transform ${open ? "rotate-180":""}`} />
             </button>
