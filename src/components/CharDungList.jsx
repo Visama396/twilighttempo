@@ -80,7 +80,7 @@ function CharDungList() {
     const [selectedChar, setSelectedChar] = useState(null)
     const [selectedDung, setSelectedDung] = useState(null)
     const [selectedStasis, setSelectedStasis] = useState(1)
-    const [debug, setDebug] = useState("")
+    const [debug, setDebug] = useState("nada en debug")
 
     useEffect(() => {
         async function fetchData() {
@@ -110,7 +110,7 @@ function CharDungList() {
 
     const addCharacter = async (chrt, dng, sta) => {
         const result = await insertCharacterDungeon(sta, chrt, dng)
-        setDebug(result)
+        setDebug(result ? "algo en debug " + result : "nada")
         setShowAddCharacter(false)
     }
 
