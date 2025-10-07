@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { TablesDB } from "appwrite"
 import { appwriteAccount, appwriteClient } from "../service/appwriteConnection"
+import CustomSelector from "./CustomSelector"
 
 const client = appwriteClient
 
@@ -46,11 +47,20 @@ function StasisLevelColor (level) {
         return `rgb(${r}, ${g}, ${b})`
     }
 
-    const factor = (level - 1) / 9
+    const factor = Math.min(Math.max((level - 1) / 9, 0), 1)
 
-    const color = interpolateColor("#ffe6f0", "ff007f", factor)
+    const color = interpolateColor("#ffe6f0", "#ff007f", factor)
 
     return color
+}
+
+function GetTextColor(rgbString) {
+    const match = rgbString.match(/\d+/g)
+    if (!match) return "black"
+
+    const [r, g, b] = match.map(Number)
+    const lumi = 0.299 * r + 0.587 * g + 0.114 * b
+    return lumi > 150 ? "black" : "white"
 }
 
 function CharDungList() {
@@ -58,36 +68,110 @@ function CharDungList() {
     const [dungeons, setDungeons] = useState([])
     const [characters, setCharacters] = useState([])
     const [dungeonsDone, setDungeonsDone] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [showAddCharacter, setShowAddCharacter] = useState(false)
+    const [selectedChar, setSelectedChar] = useState(null)
+    const [selectedDung, setSelectedDung] = useState(null)
+    const [selectedStasis, setSelectedStasis] = useState(1)
 
     useEffect(() => {
-        getDungeons().then(response => {
-            setDungeons(response.rows)
-        })
+        async function fetchData() {
+            try {
+                const [dunRes, charRes, doneRes] = await Promise.all([
+                    getDungeons(),
+                    getCharacters(),
+                    getDungeonsDone()
+                ])
+                
+                setDungeons(dunRes.rows)
+                setCharacters(charRes.rows)
+                setDungeonsDone(doneRes.rows)
+            } catch (err) {
+                console.error("Error al cargar datos: ", err)
+            } finally {
+                setLoading(false)
+            }
+        }
 
-        getDungeonsDone().then(response => {
-            setDungeonsDone(response.rows)
-        })
-
-        getCharacters().then(response => {
-            setCharacters(response.rows)
-        })
+        fetchData()
     }, [])
+
+    const showModal = () => {
+        setShowAddCharacter(true)
+    }
+
+    const addCharacter = (chrt, dng, sta) => {
+
+        setShowAddCharacter(false)
+    }
+
+    const doneByDungeon = useMemo(() => {
+        const map = {}
+
+        dungeonsDone.forEach((dd) => {
+            if (!map[dd.mazmorra]) map[dd.mazmorra] = []
+            map[dd.mazmorra].push(dd)
+        })
+        return map
+    }, [dungeonsDone])
+
+    if (loading) {
+        return <p className="text-white text-xl p-2">Cargando mazmorras...</p>
+    }
+
+    if (dungeons.length === 0) {
+        return <p className="text-white">No se han encontrado mazmorras</p>
+    }
 
     return (
         <section className="p-2">
-            <h2 className="text-white text-2xl">Mazmorras Franja 200</h2>
-            <div className="grid gap-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                {dungeons && dungeons.length > 0 ? dungeons.map(dung => (
-                    <article className="p-2 bg-[#333] rounded-md" key={dung.$id}>
-                        <h3 className="text-white text-lg">{dung.nombre}</h3>
-                        <div>
-                            {dungeonsDone && dungeonsDone.length > 0 && dungeonsDone.find(dd => dung.$id == dd.mazmorra) ? 
-                                dungeonsDone.map(dd => (<p className="text-white" key={dd.$id}>{characters.find(chr => chr.$id == dd.personaje).nombre} <span className="px-1 rounded-md" style={{backgroundColor: StasisLevelColor(dd.Stasis)}}>S{dd.Stasis}</span></p>)) 
-                                : <p>No hemos hecho esta mazmorra aún</p>}
+            <button onClick={showModal} className="px-3 py-1 bg-blue-600 rounded-md text-white cursor-pointer">Añadir personaje</button>
+
+            {showAddCharacter && (
+                <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50">
+                    <div className="bg-[#333] p-6 rounded-lg shadow-lg w-120">
+                        <h3 className="text-white text-lg mb-4" onClick={() => { console.log(selectedDung, selectedChar, selectedStasis) }}>Añadir run</h3>
+                        <div className="flex gap-1">
+                            <CustomSelector options={dungeons} selected={selectedDung} onSelect={setSelectedDung} labelKey="nombre" placeholder="Mazmorra" />
+                            <CustomSelector options={characters} selected={selectedChar} onSelect={setSelectedChar} labelKey="nombre" placeholder="Personaje" />
+                            <CustomSelector options={Array.from({ length: 10 }, (_, i) => i + 1)} selected={selectedStasis} onSelect={setSelectedStasis} placeholder="Stasis" getColor={(stasis) => { StasisLevelColor(stasis) }} />
                         </div>
-                    </article>                
-                )) 
-                : <div>No se han encontrado mazmorras</div>}
+                        <button className="mt-4 px-3 py-1 bg-blue-600 rounded-md text-white cursor-pointer" onClick={addCharacter}>
+                            Confirmar
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <h2 className="text-white text-2xl mb-2">Mazmorras Franja 200</h2>
+
+            <div className="grid gap-2 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                {dungeons.map((dung) => {
+                    const completadas = doneByDungeon[dung.$id] || [];
+
+                    return (
+                        <article className="p-3 bg-[#333] rounded-md shadow-sm shadow-white border border-gray-700" key={dung.$id}>
+                            <h3 className="text-white text-lg font-semibold mb-1">{dung.nombre}</h3>
+
+                            <div className="px-1">
+                                {completadas.length > 0 ? (
+                                    completadas.map((dd) => {
+                                        const char = characters.find((c) => c.$id === dd.personaje)
+
+                                        return (
+                                            <p key={dd.$id} className="text-white">
+                                                {char ? char.nombre : "Desconocido"}{" "}
+                                                <span className="px-1 rounded-md text-sm font-semibold" style={{backgroundColor: StasisLevelColor(dd.Stasis), color: GetTextColor(StasisLevelColor(dd.Stasis))}}>
+                                                    S{dd.Stasis}
+                                                </span>
+                                            </p>
+                                        )
+                                    })
+                                ) : (<p className="text-gray-400 text-sm">No hemos hecho esta mazmorra aún</p>)}
+                            </div>
+                        </article>
+                    )
+                })}
             </div>            
         </section>
     )
