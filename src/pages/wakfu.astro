@@ -1,15 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro"
 import CharDungList from "../components/CharDungList"
-
-const date = new Date()
-let month = date.getMonth()
-const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 ---
 
 <Layout title="Twilight Tempo - Wakfu">
-    <header>
-        <h1 class="text-white text-3xl p-2">Resumen del mes de {meses[month]}</h1>
-    </header>
     <CharDungList client:load />
 </Layout>

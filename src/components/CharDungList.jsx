@@ -80,6 +80,7 @@ function CharDungList() {
     const [selectedChar, setSelectedChar] = useState(null)
     const [selectedDung, setSelectedDung] = useState(null)
     const [selectedStasis, setSelectedStasis] = useState(null)
+    const [endMonthReward, setEndMonthReward] = useState(0)
 
     useEffect(() => {
         async function fetchData() {
@@ -112,6 +113,10 @@ function CharDungList() {
         setShowAddCharacter(false)
     }
 
+    const date = new Date()
+    let month = date.getMonth()
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+
     const doneByDungeon = useMemo(() => {
         const map = {}
 
@@ -132,6 +137,10 @@ function CharDungList() {
 
     return (
         <section className="p-2">
+            <header>
+                <h1 className="text-white text-3xl p-2">Resumen del mes de {meses[month]}</h1>
+                <h4 className="text-gray-400 text-md">Total de cofres: {endMonthReward}</h4>
+            </header>
             <button onClick={showModal} className="px-3 py-1 bg-blue-600 rounded-md text-white cursor-pointer">Añadir personaje</button>
 
             {showAddCharacter && (
@@ -160,18 +169,16 @@ function CharDungList() {
                         <article className="p-3 bg-[#333] rounded-md shadow-sm shadow-white border border-gray-700" key={dung.$id}>
                             <h3 className="text-white text-lg font-semibold mb-1">{dung.nombre}</h3>
 
-                            <div className="px-1">
+                            <div className="flex gap-2">
                                 {completadas.length > 0 ? (
                                     completadas.map((dd) => {
                                         const char = characters.find((c) => c.$id === dd.personaje)
 
                                         return (
-                                            <p key={dd.$id} className="text-white">
+                                            <span key={dd.$id} className="px-1 rounded-md text-sm font-semibold bg-emerald-500">
+                                                <span className="w-5 h-5 rounded-full" style={{backgroundColor: StasisLevelColor(dd.stasis)}}></span>
                                                 {char ? char.nombre : "Desconocido"}{" "}
-                                                <span className="px-1 rounded-md text-sm font-semibold" style={{backgroundColor: StasisLevelColor(dd.stasis), color: GetTextColor(StasisLevelColor(dd.stasis))}}>
-                                                    S{dd.stasis}
-                                                </span>
-                                            </p>
+                                            </span>
                                         )
                                     })
                                 ) : (<p className="text-gray-400 text-sm">No hemos hecho esta mazmorra aún</p>)}
