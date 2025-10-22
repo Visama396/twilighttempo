@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { ID, Query, TablesDB } from "appwrite"
 import { appwriteAccount, appwriteClient } from "../service/appwriteConnection"
+import { Trash2 } from "lucide-react"
 import CustomSelector from "./CustomSelector"
 
 const client = appwriteClient
@@ -169,9 +170,12 @@ function CharDungList() {
                                             const char = characters.find((c) => c.$id === dd.personaje)
                                             
                                             return (
-                                                <div key={dd.$id} className="flex gap-2 px-2 py-1 rounded-md font-semibold bg-emerald-400/80 items-center">
+                                                <div key={dd.$id} className="flex gap-2 px-2 py-1 rounded-md font-semibold bg-emerald-400/80 items-center group">
                                                     <span className="inline-block size-3 rounded-full" style={{backgroundColor: StasisLevelColor(dd.stasis)}}></span>
                                                     <span className="text-white">{char.nombre}</span>
+                                                    <span className="group-hover:inline-block">
+                                                        <Trash2 />
+                                                    </span>
                                                 </div>
                                             )
                                         })}
