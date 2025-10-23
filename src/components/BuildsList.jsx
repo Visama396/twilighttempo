@@ -7,6 +7,13 @@ export default function BuildsList() {
     const [filterDamages, setFilterDamages] = useState([])
 
     const actions = [1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26]
+
+    const rarityGradients = {
+        4: "from-yellow-400 via-[#222] to-[#222]",
+        5: "from-purple-500 via-[#222] to-[#222]",
+        6: "from-blue-500 via-[#222] to-[#222]",
+        7: "from-pink-500 via-[#222] to-[#222]"
+    }
     
     const toggleDamage = (ids) => {
         setFilterDamages((prev => {
@@ -21,9 +28,9 @@ export default function BuildsList() {
         }))
     }
 
-    let items = searchItem(filterLevel, 134, 4)
+    let items = searchItem(filterLevel, 134, [4, 5, 6, 7])
 
-    items = items.filter(i => i.definition.equipEffects.find(e => filterDamages.includes(e.effect.definition.actionId)))
+    items = items.filter(i => i.definition.equipEffects.some(e => filterDamages.includes(e.effect.definition.actionId)))
 
     items = items.sort((a, b) => totalDamage(b.definition.equipEffects, b.definition.item.level, actions) - totalDamage(a.definition.equipEffects, a.definition.item.level, actions))
 
@@ -74,52 +81,55 @@ export default function BuildsList() {
                 
             </section>
 
-            <section className="grid grid-cols-4 gap-2">
+            <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                 {
                     items.map(item => {
-                        let eqf = item.definition.equipEffects
-                        let lvl = item.definition.item.level
-                        let id = item.definition.item.id
-                        let nombre = item.title.es
+                        const eqf = item.definition.equipEffects
+                        const lvl = item.definition.item.level
+                        const id = item.definition.item.id
+                        const nombre = item.title.es
+                        const rarity = item.definition.item.baseParameters.rarity
+                        const gradient = rarityGradients[rarity] || "from-yellow-500 to-[#222]"
+
                         return (
-                            <div className="text-white bg-[#222] p-2 shadow-xl rounded-md" key={id}>
-                                <h2 className="text-xl">{nombre}</h2>
+                            <div className={`text-white p-2 shadow-xl rounded-md bg-gradient-to-br ${gradient} flex flex-col`} key={id}>
+                                <h2 className="text-2xl font-semibold">{nombre}</h2>
                                 {
                                     totalDamage(eqf, lvl, [1052]) > 0 && (
-                                        <p>Melee: {totalDamage(eqf, lvl, [1052])}</p>
+                                        <p className="px-1 font-semibold">Melee: {totalDamage(eqf, lvl, [1052])}</p>
                                     )
                                 }
                                 {
                                     totalDamage(eqf, lvl, [1053]) > 0 && (
-                                        <p>Distancia: {totalDamage(eqf, lvl, [1053])}</p>
+                                        <p className="px-1 font-semibold">Distancia: {totalDamage(eqf, lvl, [1053])}</p>
                                     )
                                 }
                                 {
                                     totalDamage(eqf, lvl, [26]) > 0 && (
-                                        <p>Curas: {totalDamage(eqf, lvl, [26])}</p>
+                                        <p className="px-1 font-semibold">Curas: {totalDamage(eqf, lvl, [26])}</p>
                                     )
                                 }
                                 {
                                     totalDamage(eqf, lvl, [1055]) > 0 && (
-                                        <p>Berserker: {totalDamage(eqf, lvl, [1055])}</p>
+                                        <p className="px-1 font-semibold">Berserker: {totalDamage(eqf, lvl, [1055])}</p>
                                     )
                                 }
                                 {
                                     totalDamage(eqf, lvl, [180]) > 0 && (
-                                        <p>Espalda: {totalDamage(eqf, lvl, [180])}</p>
+                                        <p className="px-1 font-semibold">Espalda: {totalDamage(eqf, lvl, [180])}</p>
                                     )
                                 }
                                 {
                                     totalDamage(eqf, lvl, [149]) > 0 && (
-                                        <p>Crítico: {totalDamage(eqf, lvl, [149])}</p>
+                                        <p className="px-1 font-semibold">Crítico: {totalDamage(eqf, lvl, [149])}</p>
                                     )
                                 }
                                 {
                                     totalDamage(eqf, lvl, [1068]) > 0 && (
-                                        <p>Elemental: {totalDamage(eqf, lvl, [1068])}</p>
+                                        <p className="px-1 font-semibold">Elemental: {totalDamage(eqf, lvl, [1068])}</p>
                                     )
                                 }
-                                <p>Total: {totalDamage(eqf, lvl, actions)}</p>
+                                <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total: {totalDamage(eqf, lvl, actions)}</p>
                             </div>
                         )
                     })

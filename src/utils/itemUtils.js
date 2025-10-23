@@ -3,8 +3,8 @@ import items from '../data/items.json'
 // Caso práctico sencillo:
 // Buscar cascos de nivel 200
 
-const searchItem = (level, itemType, rarity) => {
-    const filteredItems = items.filter(i => i.definition.item.level == level && i.definition.item.baseParameters.itemTypeId == itemType && i.definition.item.baseParameters.rarity == rarity)
+const searchItem = (level, itemType, rarities) => {
+    const filteredItems = items.filter(i => i.definition.item.level == level && i.definition.item.baseParameters.itemTypeId == itemType &&  rarities.includes(i.definition.item.baseParameters.rarity))
 
     return filteredItems
 }
