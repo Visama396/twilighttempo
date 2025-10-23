@@ -47,7 +47,6 @@ export default function BuildsList() {
                         <LevelFilter defaultLevel={filterLevel} setFilterLevel={setFilterLevel} />
                     </div>
                 </div>
-
                 <div className="flex gap-1 text-white">
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="elemental">Dominio Elemental</label>
@@ -92,45 +91,55 @@ export default function BuildsList() {
                         const gradient = rarityGradients[rarity] || "from-yellow-500 to-[#222]"
 
                         return (
-                            <div className={`text-white p-2 shadow-xl rounded-md bg-gradient-to-br ${gradient} flex flex-col`} key={id}>
-                                <h2 className="text-2xl font-semibold">{nombre}</h2>
-                                {
-                                    totalDamage(eqf, lvl, [1052]) > 0 && (
-                                        <p className="px-1 font-semibold">Melee: {totalDamage(eqf, lvl, [1052])}</p>
-                                    )
-                                }
-                                {
-                                    totalDamage(eqf, lvl, [1053]) > 0 && (
-                                        <p className="px-1 font-semibold">Distancia: {totalDamage(eqf, lvl, [1053])}</p>
-                                    )
-                                }
-                                {
-                                    totalDamage(eqf, lvl, [26]) > 0 && (
-                                        <p className="px-1 font-semibold">Curas: {totalDamage(eqf, lvl, [26])}</p>
-                                    )
-                                }
-                                {
-                                    totalDamage(eqf, lvl, [1055]) > 0 && (
-                                        <p className="px-1 font-semibold">Berserker: {totalDamage(eqf, lvl, [1055])}</p>
-                                    )
-                                }
-                                {
-                                    totalDamage(eqf, lvl, [180]) > 0 && (
-                                        <p className="px-1 font-semibold">Espalda: {totalDamage(eqf, lvl, [180])}</p>
-                                    )
-                                }
-                                {
-                                    totalDamage(eqf, lvl, [149]) > 0 && (
-                                        <p className="px-1 font-semibold">Crítico: {totalDamage(eqf, lvl, [149])}</p>
-                                    )
-                                }
-                                {
-                                    totalDamage(eqf, lvl, [1068]) > 0 && (
-                                        <p className="px-1 font-semibold">Elemental: {totalDamage(eqf, lvl, [1068])}</p>
-                                    )
-                                }
-                                <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total: {totalDamage(eqf, lvl, actions)}</p>
+                            <div className={`text-white p-2 shadow-xl rounded-md bg-gradient-to-br ${gradient} flex flex-col gap-2`} key={id}>
+                                <div>
+                                    <h2 className="text-2xl font-semibold">{nombre}</h2>
+                                </div>
+                                <div className="flex">
+                                    <div>
+                                        {
+                                            totalDamage(eqf, lvl, [1052]) > 0 && (
+                                                <p className="px-1 font-semibold">Melee: {totalDamage(eqf, lvl, [1052])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1053]) > 0 && (
+                                                <p className="px-1 font-semibold">Distancia: {totalDamage(eqf, lvl, [1053])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [26]) > 0 && (
+                                                <p className="px-1 font-semibold">Curas: {totalDamage(eqf, lvl, [26])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1055]) > 0 && (
+                                                <p className="px-1 font-semibold">Berserker: {totalDamage(eqf, lvl, [1055])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [180]) > 0 && (
+                                                <p className="px-1 font-semibold">Espalda: {totalDamage(eqf, lvl, [180])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [149]) > 0 && (
+                                                <p className="px-1 font-semibold">Crítico: {totalDamage(eqf, lvl, [149])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1068]) > 0 && (
+                                                <p className="px-1 font-semibold">Elemental: {totalDamage(eqf, lvl, [1068])}</p>
+                                            )
+                                        }
+                                        <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total: {totalDamage(eqf, lvl, actions)}</p>
+                                    </div>
+                                    <div>
+                                        <p>Resistencia: 0</p>
+                                    </div>
+                                </div>
                             </div>
+                            
                         )
                     })
                 }
