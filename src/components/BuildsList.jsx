@@ -36,7 +36,11 @@ export default function BuildsList() {
 
     let items = searchItem(filterLevel, filterItemType.id, [4, 5, 6, 7])
 
-    items = items.filter(i => i.definition.equipEffects.some(e => filterDamages.includes(e.effect.definition.actionId)))
+    //items = items.filter(i => i.definition.equipEffects.every(e => filterDamages.includes(e.effect.definition.actionId)))
+    items = items.filter(i => {
+        const damageEffects = i.definition.equipEffects.filter(e => actionsDMG.includes(e.effect.definition.actionId))
+        return (damageEffects.length > 0 && damageEffects.every(e => filterDamages.includes(e.effect.definition.actionId)))
+    })
 
     switch (filterSort.id) {
         case 0: 
@@ -46,7 +50,6 @@ export default function BuildsList() {
             items = items.sort((a, b) => totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal) - totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal))
             break
     }
-
 
     return (
         <section className="p-4">
