@@ -54,4 +54,4 @@ const amountElements = (effects, level, action) => {
     return 0
 }
 
-export { searchItem, totalDamage, totalDefense, amountElements }
+export { searchItem, totalDamage, totalDefense, amountElements, firstParam }

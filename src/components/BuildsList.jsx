@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { searchItem, totalDamage, totalDefense, amountElements } from "../utils/itemUtils"
+import { searchItem, totalDamage, totalDefense, amountElements, firstParam } from "../utils/itemUtils"
 import LevelFilter from "./LevelFilter"
 import ItemFilter from "./ItemFilter"
 import SortFilter from "./SortFilter"
@@ -36,7 +36,6 @@ export default function BuildsList() {
 
     let items = searchItem(filterLevel, filterItemType.id, [4, 5, 6, 7])
 
-    //items = items.filter(i => i.definition.equipEffects.every(e => filterDamages.includes(e.effect.definition.actionId)))
     items = items.filter(i => {
         const damageEffects = i.definition.equipEffects.filter(e => actionsDMG.includes(e.effect.definition.actionId))
         return (damageEffects.length > 0 && damageEffects.every(e => filterDamages.includes(e.effect.definition.actionId)))
@@ -130,67 +129,167 @@ export default function BuildsList() {
                                 <div>
                                     <h2 className="text-2xl font-semibold">{nombre}</h2>
                                 </div>
+                                <div className="flex flex-col gap-2 bg-slate-600/15 backdrop-blur-md p-2 rounded-md">
+                                    <h3 className="text-lg font-semibold">Extras</h3>
+                                    <div className="flex gap-2">
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 31) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-green-300">{firstParam(eqf.find(e => e.effect.definition.actionId == 31).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/ap.png" alt="PA" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 56) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-red-600">{firstParam(eqf.find(e => e.effect.definition.actionId == 56).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/ap.png" alt="PA" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 41) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-green-300">{firstParam(eqf.find(e => e.effect.definition.actionId == 41).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/mp.png" alt="PM" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 57) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-red-600">{firstParam(eqf.find(e => e.effect.definition.actionId == 57).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/mp.png" alt="PM" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 191) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-green-300">{firstParam(eqf.find(e => e.effect.definition.actionId == 191).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/wp.png" alt="PW" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 192) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-red-600">{firstParam(eqf.find(e => e.effect.definition.actionId == 192).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/wp.png" alt="PW" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 160) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-green-300">{firstParam(eqf.find(e => e.effect.definition.actionId == 160).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/range.png" alt="Range" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 161) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-red-600">{firstParam(eqf.find(e => e.effect.definition.actionId == 161).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/range.png" alt="Range" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 150) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-green-300">{firstParam(eqf.find(e => e.effect.definition.actionId == 150).effect.definition.params, lvl)}% <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/critical.png" alt="Chance" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 168) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-red-600">{firstParam(eqf.find(e => e.effect.definition.actionId == 168).effect.definition.params, lvl)}% <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/critical.png" alt="Chance" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 875) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-green-300">{firstParam(eqf.find(e => e.effect.definition.actionId == 875).effect.definition.params, lvl)}% <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/block.png" alt="Block" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 876) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-red-600">{firstParam(eqf.find(e => e.effect.definition.actionId == 876).effect.definition.params, lvl)}% <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/block.png" alt="Block" /></p>
+                                            )
+                                        }
+                                        {
+                                            eqf.find(e => e.effect.definition.actionId == 184) && (
+                                                <p className="flex items-center gap-2 bg-slate-200/40 rounded-md p-2 text-green-300">{firstParam(eqf.find(e => e.effect.definition.actionId == 184).effect.definition.params, lvl)} <img className="size-[18px]" src="https://vertylo.github.io/wakassets/icons/control.png" alt="Control" /></p>
+                                            )
+                                        }
+                                    </div>
+                                </div>
                                 <div className="flex flex-1 gap-4">
                                     <div className="flex flex-col flex-1 bg-slate-600/15 backdrop-blur-md p-2 rounded-md">
                                         <h3 className="text-lg font-semibold">Dominios</h3>
                                         {
                                             totalDamage(eqf, lvl, [1052]) > 0 && (
-                                                <p className="px-1">Melee {totalDamage(eqf, lvl, [1052])}</p>
+                                                <p className="px-1 text-green-300">Melee {totalDamage(eqf, lvl, [1052])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [1053]) > 0 && (
-                                                <p className="px-1">Distancia {totalDamage(eqf, lvl, [1053])}</p>
+                                                <p className="px-1 text-green-300">Distancia {totalDamage(eqf, lvl, [1053])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [149]) > 0 && (
-                                                <p className="px-1">Crítico {totalDamage(eqf, lvl, [149])}</p>
+                                                <p className="px-1 text-green-300">Crítico {totalDamage(eqf, lvl, [149])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [180]) > 0 && (
-                                                <p className="px-1">Espalda {totalDamage(eqf, lvl, [180])}</p>
+                                                <p className="px-1 text-green-300">Espalda {totalDamage(eqf, lvl, [180])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [1055]) > 0 && (
-                                                <p className="px-1">Berserker {totalDamage(eqf, lvl, [1055])}</p>
+                                                <p className="px-1 text-green-300">Berserker {totalDamage(eqf, lvl, [1055])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [26]) > 0 && (
-                                                <p className="px-1">Curas {totalDamage(eqf, lvl, [26])}</p>
+                                                <p className="px-1 text-green-300">Curas {totalDamage(eqf, lvl, [26])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [122]) > 0 && (
-                                                <p className="px-1">Fuego {totalDamage(eqf, lvl, [122])}</p>
+                                                <p className="px-1 text-green-300">Fuego {totalDamage(eqf, lvl, [122])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [124]) > 0 && (
-                                                <p className="px-1">Agua {totalDamage(eqf, lvl, [124])}</p>
+                                                <p className="px-1 text-green-300">Agua {totalDamage(eqf, lvl, [124])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [123]) > 0 && (
-                                                <p className="px-1">Tierra {totalDamage(eqf, lvl, [123])}</p>
+                                                <p className="px-1 text-green-300">Tierra {totalDamage(eqf, lvl, [123])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [125]) > 0 && (
-                                                <p className="px-1">Aire {totalDamage(eqf, lvl, [125])}</p>
+                                                <p className="px-1 text-green-300">Aire {totalDamage(eqf, lvl, [125])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [1068]) > 0 && (
-                                                <p className="px-1">({amountElements(eqf, lvl, 1068)}) Elemental {totalDamage(eqf, lvl, [1068])}</p>
+                                                <p className="px-1 text-green-300">({amountElements(eqf, lvl, 1068)}) Elemental {totalDamage(eqf, lvl, [1068])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [120]) > 0 && (
-                                                <p className="px-1">(4) Elemental {totalDamage(eqf, lvl, [120])}</p>
+                                                <p className="px-1 text-green-300">(4) Elemental {totalDamage(eqf, lvl, [120])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1059]) > 0 && (
+                                                <p className="px-1 text-red-500">Melee {totalDamage(eqf, lvl, [1059])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1060]) > 0 && (
+                                                <p className="px-1 text-red-500">Distancia {totalDamage(eqf, lvl, [1060])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1056]) > 0 && (
+                                                <p className="px-1 text-red-500">Crítico {totalDamage(eqf, lvl, [1056])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [181]) > 0 && (
+                                                <p className="px-1 text-red-500">Espalda {totalDamage(eqf, lvl, [181])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1061]) > 0 && (
+                                                <p className="px-1 text-red-500">Berserker {totalDamage(eqf, lvl, [1061])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [130]) > 0 && (
+                                                <p className="px-1 text-red-500">(4) Elemental {totalDamage(eqf, lvl, [130])}</p>
                                             )
                                         }
                                         <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total {totalDamage(eqf, lvl, actionsDMG, showTotal)}</p>
@@ -200,42 +299,52 @@ export default function BuildsList() {
                                         <h3 className="text-lg font-semibold">Resistencias</h3>
                                         {
                                             totalDefense(eqf, lvl, [71]) > 0 && (
-                                                <p className="px-1">Espalda {totalDefense(eqf, lvl, [71])}</p>
+                                                <p className="px-1 text-green-300">Espalda {totalDefense(eqf, lvl, [71])}</p>
                                             )
                                         }
                                         {
                                             totalDefense(eqf, lvl, [988]) > 0 && (
-                                                <p className="px-1">Crítica {totalDefense(eqf, lvl, [988])}</p>
+                                                <p className="px-1 text-green-300">Crítica {totalDefense(eqf, lvl, [988])}</p>
                                             )
                                         }
                                         {
                                             totalDefense(eqf, lvl, [82]) > 0 && (
-                                                <p className="px-1">Fuego {totalDefense(eqf, lvl, [82])}</p>
+                                                <p className="px-1 text-green-300">Fuego {totalDefense(eqf, lvl, [82])}</p>
                                             )
                                         }
                                         {
                                             totalDefense(eqf, lvl, [83]) > 0 && (
-                                                <p className="px-1">Agua {totalDefense(eqf, lvl, [83])}</p>
+                                                <p className="px-1 text-green-300">Agua {totalDefense(eqf, lvl, [83])}</p>
                                             )
                                         }
                                         {
                                             totalDefense(eqf, lvl, [84]) > 0 && (
-                                                <p className="px-1">Tierra {totalDefense(eqf, lvl, [84])}</p>
+                                                <p className="px-1 text-green-300">Tierra {totalDefense(eqf, lvl, [84])}</p>
                                             )
                                         }
                                         {
                                             totalDefense(eqf, lvl, [85]) > 0 && (
-                                                <p className="px-1">Aire {totalDefense(eqf, lvl, [85])}</p>
+                                                <p className="px-1 text-green-300">Aire {totalDefense(eqf, lvl, [85])}</p>
                                             )
                                         }
                                         {
                                             totalDefense(eqf, lvl, [80]) > 0 && (
-                                                <p className="px-1">(4) Elemental {totalDefense(eqf, lvl, [80])}</p>
+                                                <p className="px-1 text-green-300">(4) Elemental {totalDefense(eqf, lvl, [80])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [1063]) > 0 && (
+                                                <p className="px-1 text-red-500">Espalda {totalDefense(eqf, lvl, [1063])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [1062]) > 0 && (
+                                                <p className="px-1 text-red-500">Crítica {totalDefense(eqf, lvl, [1062])}</p>
                                             )
                                         }
                                         {
                                             totalDefense(eqf, lvl, [1069]) > 0 && (
-                                                <p className="px-1">({amountElements(eqf, lvl, 1069)}) Elemental {totalDefense(eqf, lvl, [1069])}</p>
+                                                <p className="px-1 text-green-300">({amountElements(eqf, lvl, 1069)}) Elemental {totalDefense(eqf, lvl, [1069])}</p>
                                             )
                                         }
                                         <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total {totalDefense(eqf, lvl, actionsDEF, true)}</p>
