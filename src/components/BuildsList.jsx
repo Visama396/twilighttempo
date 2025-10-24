@@ -5,10 +5,10 @@ import ItemFilter from "./ItemFilter"
 import SortFilter from "./SortFilter"
 
 export default function BuildsList() {
-    const [filterLevel, setFilterLevel] = useState(200)
-    const [filterItemType, setFilterItemType] = useState({id: 134, name: "Casco"})
+    const [filterLevel, setFilterLevel] = useState(245)
+    const [filterItemType, setFilterItemType] = useState({id: [134], name: "Casco"})
     const [filterSort, setFilterSort] = useState({ id: 0, name: "Dominios ↑" })
-    const [filterDamages, setFilterDamages] = useState([1068])
+    const [filterDamages, setFilterDamages] = useState([1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26])
     const [showTotal, setShowTotal] = useState(false)
 
     const actionsDMG = [1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26]
@@ -48,6 +48,12 @@ export default function BuildsList() {
             break
         case 1:
             items = items.sort((a, b) => totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal) - totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal))
+            break
+        case 2:
+            items = items.sort((a, b) => totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true) - totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true))
+            break
+        case 3:
+            items = items.sort((a, b) => totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true) - totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true))
             break
     }
 
@@ -195,6 +201,11 @@ export default function BuildsList() {
                                         {
                                             totalDefense(eqf, lvl, [71]) > 0 && (
                                                 <p className="px-1">Espalda {totalDefense(eqf, lvl, [71])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [988]) > 0 && (
+                                                <p className="px-1">Crítica {totalDefense(eqf, lvl, [988])}</p>
                                             )
                                         }
                                         {

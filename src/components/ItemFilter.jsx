@@ -3,16 +3,24 @@ import { useState } from "react"
 export default function ItemFilter({ defaultItem, setFilterItem }) {
     const [selectedItem, setSelectedItem] = useState(defaultItem)
     const itemFilters = [
-        {id: 120, name: "Amuleto"},
-        {id: 132, name: "Capa"},
-        {id: 134, name: "Casco"},
-        {id: 138, name: "Hombreras"}
+        {id: [134], name: "Casco"},
+        {id: [120], name: "Amuleto"},
+        {id: [136], name: "Coraza"},
+        {id: [103], name: "Anillo"},
+        {id: [119], name: "Botas"},
+        {id: [132], name: "Capa"},
+        {id: [138], name: "Hombreras"},
+        {id: [133], name: "Cinturón"},
+        {id: [108,110,113,115,254], name: "Armas (1 mano)"},
+        {id: [101,111,114,117,223,253], name: "Armas (2 manos)"},
+        {id: [108,101,110,111,113,114,115,117,223,253,254], name: "Armas principales"},
+        {id: [112,189], name: "Armas secundarias"}
     ]
 
     return (
         <div className="text-white relative group cursor-pointer">
             <span className="px-1 text-center rounded-md bg-[#555]">{selectedItem.name}</span>
-            <div className="absolute top-5 z-20 bg-[#333] px-3 py-1 gap-1 group-hover:flex flex-col items-center hidden rounded-sm shadow-md">
+            <div className="absolute top-5 z-20 bg-[#333] px-3 py-1 gap-1 group-hover:flex flex-col items-center hidden rounded-sm shadow-md w-45">
                 {
                     itemFilters.map(item => {
                         return (
