@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react"
-import { searchItem, totalDamage } from "../utils/itemUtils"
+import { searchItem, totalDamage, totalDefense, amountElements } from "../utils/itemUtils"
 import LevelFilter from "./LevelFilter"
+import ItemFilter from "./ItemFilter"
+import SortFilter from "./SortFilter"
 
 export default function BuildsList() {
     const [filterLevel, setFilterLevel] = useState(200)
-    const [filterDamages, setFilterDamages] = useState([])
+    const [filterItemType, setFilterItemType] = useState({id: 134, name: "Casco"})
+    const [filterSort, setFilterSort] = useState({ id: 0, name: "Dominios ↑" })
+    const [filterDamages, setFilterDamages] = useState([1068])
+    const [showTotal, setShowTotal] = useState(false)
 
-    const actions = [1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26]
+    const actionsDMG = [1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26]
+    const actionsDEF = [71, 80, 82, 83, 84, 85, 988, 1069]
 
     const rarityGradients = {
         4: "from-yellow-400 via-[#222] to-[#222]",
@@ -28,11 +34,19 @@ export default function BuildsList() {
         }))
     }
 
-    let items = searchItem(filterLevel, 134, [4, 5, 6, 7])
+    let items = searchItem(filterLevel, filterItemType.id, [4, 5, 6, 7])
 
     items = items.filter(i => i.definition.equipEffects.some(e => filterDamages.includes(e.effect.definition.actionId)))
 
-    items = items.sort((a, b) => totalDamage(b.definition.equipEffects, b.definition.item.level, actions) - totalDamage(a.definition.equipEffects, a.definition.item.level, actions))
+    switch (filterSort.id) {
+        case 0: 
+            items = items.sort((a, b) => totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal) - totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal))
+            break
+        case 1:
+            items = items.sort((a, b) => totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal) - totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal))
+            break
+    }
+
 
     return (
         <section className="p-4">
@@ -45,6 +59,18 @@ export default function BuildsList() {
                     <div className="bg-[#333] flex p-2 gap-2">
                         <span className="text-white">Nivel</span>
                         <LevelFilter defaultLevel={filterLevel} setFilterLevel={setFilterLevel} />
+                    </div>
+                    <div className="bg-[#333] flex p-2 gap-2">
+                        <span className="text-white">Equipamiento</span>
+                        <ItemFilter defaultItem={filterItemType} setFilterItem={setFilterItemType} />
+                    </div>
+                    <div className="bg-[#333] flex p-2 gap-2">
+                        <span className="text-white">Ordenar por</span>
+                        <SortFilter defaultSort={filterSort} setFilterSort={setFilterSort} />
+                    </div>
+                    <div className="bg-[#333] flex p-2 gap-2">
+                        <span className="text-white">Mostrar dominios totales</span>
+                        <input type="checkbox" name="showTotal" id="showTotal" checked={showTotal} onChange={() => {setShowTotal(!showTotal)}} />
                     </div>
                 </div>
                 <div className="flex gap-1 text-white">
@@ -95,47 +121,110 @@ export default function BuildsList() {
                                 <div>
                                     <h2 className="text-2xl font-semibold">{nombre}</h2>
                                 </div>
-                                <div className="flex">
-                                    <div>
+                                <div className="flex flex-1 gap-4">
+                                    <div className="flex flex-col flex-1 bg-slate-600/15 backdrop-blur-md p-2 rounded-md">
+                                        <h3 className="text-lg font-semibold">Dominios</h3>
                                         {
                                             totalDamage(eqf, lvl, [1052]) > 0 && (
-                                                <p className="px-1 font-semibold">Melee: {totalDamage(eqf, lvl, [1052])}</p>
+                                                <p className="px-1">Melee {totalDamage(eqf, lvl, [1052])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [1053]) > 0 && (
-                                                <p className="px-1 font-semibold">Distancia: {totalDamage(eqf, lvl, [1053])}</p>
-                                            )
-                                        }
-                                        {
-                                            totalDamage(eqf, lvl, [26]) > 0 && (
-                                                <p className="px-1 font-semibold">Curas: {totalDamage(eqf, lvl, [26])}</p>
-                                            )
-                                        }
-                                        {
-                                            totalDamage(eqf, lvl, [1055]) > 0 && (
-                                                <p className="px-1 font-semibold">Berserker: {totalDamage(eqf, lvl, [1055])}</p>
-                                            )
-                                        }
-                                        {
-                                            totalDamage(eqf, lvl, [180]) > 0 && (
-                                                <p className="px-1 font-semibold">Espalda: {totalDamage(eqf, lvl, [180])}</p>
+                                                <p className="px-1">Distancia {totalDamage(eqf, lvl, [1053])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [149]) > 0 && (
-                                                <p className="px-1 font-semibold">Crítico: {totalDamage(eqf, lvl, [149])}</p>
+                                                <p className="px-1">Crítico {totalDamage(eqf, lvl, [149])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [180]) > 0 && (
+                                                <p className="px-1">Espalda {totalDamage(eqf, lvl, [180])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [1055]) > 0 && (
+                                                <p className="px-1">Berserker {totalDamage(eqf, lvl, [1055])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [26]) > 0 && (
+                                                <p className="px-1">Curas {totalDamage(eqf, lvl, [26])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [122]) > 0 && (
+                                                <p className="px-1">Fuego {totalDamage(eqf, lvl, [122])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [124]) > 0 && (
+                                                <p className="px-1">Agua {totalDamage(eqf, lvl, [124])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [123]) > 0 && (
+                                                <p className="px-1">Tierra {totalDamage(eqf, lvl, [123])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDamage(eqf, lvl, [125]) > 0 && (
+                                                <p className="px-1">Aire {totalDamage(eqf, lvl, [125])}</p>
                                             )
                                         }
                                         {
                                             totalDamage(eqf, lvl, [1068]) > 0 && (
-                                                <p className="px-1 font-semibold">Elemental: {totalDamage(eqf, lvl, [1068])}</p>
+                                                <p className="px-1">({amountElements(eqf, lvl, 1068)}) Elemental {totalDamage(eqf, lvl, [1068])}</p>
                                             )
                                         }
-                                        <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total: {totalDamage(eqf, lvl, actions)}</p>
+                                        {
+                                            totalDamage(eqf, lvl, [120]) > 0 && (
+                                                <p className="px-1">(4) Elemental {totalDamage(eqf, lvl, [120])}</p>
+                                            )
+                                        }
+                                        <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total {totalDamage(eqf, lvl, actionsDMG, showTotal)}</p>
+                                        
                                     </div>
-                                    <div>
-                                        <p>Resistencia: 0</p>
+                                    <div className="flex flex-col flex-1 bg-slate-600/15 backdrop-blur-md p-2 rounded-md">
+                                        <h3 className="text-lg font-semibold">Resistencias</h3>
+                                        {
+                                            totalDefense(eqf, lvl, [71]) > 0 && (
+                                                <p className="px-1">Espalda {totalDefense(eqf, lvl, [71])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [82]) > 0 && (
+                                                <p className="px-1">Fuego {totalDefense(eqf, lvl, [82])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [83]) > 0 && (
+                                                <p className="px-1">Agua {totalDefense(eqf, lvl, [83])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [84]) > 0 && (
+                                                <p className="px-1">Tierra {totalDefense(eqf, lvl, [84])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [85]) > 0 && (
+                                                <p className="px-1">Aire {totalDefense(eqf, lvl, [85])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [80]) > 0 && (
+                                                <p className="px-1">(4) Elemental {totalDefense(eqf, lvl, [80])}</p>
+                                            )
+                                        }
+                                        {
+                                            totalDefense(eqf, lvl, [1069]) > 0 && (
+                                                <p className="px-1">({amountElements(eqf, lvl, 1069)}) Elemental {totalDefense(eqf, lvl, [1069])}</p>
+                                            )
+                                        }
+                                        <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total {totalDefense(eqf, lvl, actionsDEF, true)}</p>
                                     </div>
                                 </div>
                             </div>
