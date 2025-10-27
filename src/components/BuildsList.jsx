@@ -14,6 +14,70 @@ export default function BuildsList() {
     const actionsDMG = [1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26]
     const actionsDEF = [71, 80, 82, 83, 84, 85, 988, 1069]
 
+    const statNames = {
+        "chance": "Golpe crítico",
+        "lock": "Placaje",
+        "AP": "PA",
+        "MP": "PM",
+        "WP": "PW"
+    }
+
+    let buildItems = [
+        {
+            id: [134],
+            name: "HEAD",
+            itemId: -1
+        },
+        {
+            id: [120],
+            name: "NECK",
+            itemId: -1
+        },
+        {
+            id: [136],
+            name: "CHEST",
+            itemId: -1
+        },
+        {
+            id: [103],
+            name: "LEFT_HAND",
+            itemId: -1
+        },
+        {
+            id: [103],
+            name: "RIGHT_HAND",
+            itemId: -1
+        },
+        {
+            id: [119],
+            name: "LEGS",
+            itemId: -1
+        },
+        {
+            id: [132],
+            name: "BACK",
+            itemId: -1
+        },
+        {
+            id: [138],
+            name: "SHOULDERS",
+            itemId: -1
+        },
+        {
+            id: [133],
+            name: "BELT",
+            itemId: -1
+        },
+    ]
+
+    /**
+     * ACCESSORY.png
+FIRST_WEAPON.png
+MOUNT.png
+PET.png
+SECOND_WEAPON.png
+     */
+
     const rarityGradients = {
         4: "from-yellow-400 via-[#222] to-[#222]",
         5: "from-purple-500 via-[#222] to-[#222]",
@@ -62,8 +126,25 @@ export default function BuildsList() {
                 <h1 className="text-white text-3xl">UwUConstructor de wuwconjuntos</h1>
             </header>
 
-            <section className="flex flex-col gap-2 py-2">
+            <section className="py-2">
                 <div className="flex gap-2">
+                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center">
+                        <p className="text-white">Crear</p>
+                    </div>
+                    {
+                        buildItems.map(it => {
+                            return (
+                                <figure className="bg-[#333] cursor-pointer rounded-md transition-all duration-300 hover:bg-[#555]">
+                                    <img className="size-10 md:size-15 lg:size-18 xl:size-18" src={`https://tmktahu.github.io/WakfuAssets/equipmentDefaults/${it.name}.png`} alt={`${it.name.toLowerCase()} placeholder`} />
+                                </figure>
+                            )
+                        })
+                    }
+                </div>
+            </section>
+
+            <section className="flex flex-col gap-3 py-2">
+                <div className="grid grid-cols-2 lg:flex gap-2">
                     <div className="bg-[#333] flex p-2 gap-2">
                         <span className="text-white">Nivel</span>
                         <LevelFilter defaultLevel={filterLevel} setFilterLevel={setFilterLevel} />
@@ -81,7 +162,7 @@ export default function BuildsList() {
                         <input type="checkbox" name="showTotal" id="showTotal" checked={showTotal} onChange={() => {setShowTotal(!showTotal)}} />
                     </div>
                 </div>
-                <div className="flex gap-1 text-white">
+                <div className="grid grid-cols-2 lg:flex gap-2 text-white">
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="elemental">Dominio Elemental</label>
                         <input type="checkbox" name="elemental" id="elemental" checked={filterDamages.includes(1068) || filterDamages.includes(120)} onChange={() => {toggleDamage([1068, 120])}} />
@@ -123,6 +204,7 @@ export default function BuildsList() {
                         const nombre = item.title.es
                         const rarity = item.definition.item.baseParameters.rarity
                         const gradient = rarityGradients[rarity] || "from-yellow-500 to-[#222]"
+                        const requirement = item.definition.equipRequirement
 
                         return (
                             <div className={`text-white p-2 shadow-xl rounded-md bg-gradient-to-br ${gradient} flex flex-col gap-2`} key={id}>
@@ -350,6 +432,13 @@ export default function BuildsList() {
                                         <p className="font-semibold text-lg flex-1 flex flex-col justify-end items-end">Total {totalDefense(eqf, lvl, actionsDEF, true)}</p>
                                     </div>
                                 </div>
+                                {
+                                    requirement && (
+                                        <div className="bg-slate-600/15 rounded-md p-2">
+                                            <p className="px-1 text-red-500">{(requirement.lower ? statNames[requirement.stat] + " =< " + requirement.lower:"")}</p>
+                                        </div>
+                                    )
+                                }
                             </div>
                             
                         )
