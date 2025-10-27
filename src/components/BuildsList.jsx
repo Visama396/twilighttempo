@@ -10,6 +10,62 @@ export default function BuildsList() {
     const [filterSort, setFilterSort] = useState({ id: 0, name: "Dominios ↑" })
     const [filterDamages, setFilterDamages] = useState([1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26])
     const [showTotal, setShowTotal] = useState(false)
+    const [buildItems, setBuildItems] = useState([
+        {
+            id: [134],
+            name: "HEAD",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [120],
+            name: "NECK",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [136],
+            name: "CHEST",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [103],
+            name: "LEFT_HAND",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [103],
+            name: "RIGHT_HAND",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [119],
+            name: "LEGS",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [132],
+            name: "BACK",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [138],
+            name: "SHOULDERS",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [133],
+            name: "BELT",
+            spriteId: -1,
+            itemId: -1
+        }
+    ])
 
     const actionsDMG = [1068, 120, 122, 123, 124, 125, 149, 180, 1052, 1053, 1055, 26]
     const actionsDEF = [71, 80, 82, 83, 84, 85, 988, 1069]
@@ -21,54 +77,6 @@ export default function BuildsList() {
         "MP": "PM",
         "WP": "PW"
     }
-
-    let buildItems = [
-        {
-            id: [134],
-            name: "HEAD",
-            itemId: -1
-        },
-        {
-            id: [120],
-            name: "NECK",
-            itemId: -1
-        },
-        {
-            id: [136],
-            name: "CHEST",
-            itemId: -1
-        },
-        {
-            id: [103],
-            name: "LEFT_HAND",
-            itemId: -1
-        },
-        {
-            id: [103],
-            name: "RIGHT_HAND",
-            itemId: -1
-        },
-        {
-            id: [119],
-            name: "LEGS",
-            itemId: -1
-        },
-        {
-            id: [132],
-            name: "BACK",
-            itemId: -1
-        },
-        {
-            id: [138],
-            name: "SHOULDERS",
-            itemId: -1
-        },
-        {
-            id: [133],
-            name: "BELT",
-            itemId: -1
-        },
-    ]
 
     /**
      * ACCESSORY.png
@@ -120,6 +128,39 @@ SECOND_WEAPON.png
             break
     }
 
+    const createBuild = () => {
+        console.log("Creating build")
+        let newBuildList = []
+        buildItems.forEach(bi => {
+            let bilist = searchItem(filterLevel, bi.id, [4,5,6,7])
+            bilist = bilist.filter( i => {
+                const damageEffects = i.definition.equipEffects.filter(e => actionsDMG.includes(e.effect.definition.actionId))
+                return (damageEffects.length > 0 && damageEffects.every(e => filterDamages.includes(e.effect.definition.actionId)))
+            })
+
+            switch (filterSort.id) {
+                case 0: 
+                    bilist = bilist.sort((a, b) => totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal) - totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal))
+                    break
+                case 1:
+                    bilist = bilist.sort((a, b) => totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal) - totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal))
+                    break
+                case 2:
+                    bilist = bilist.sort((a, b) => totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true) - totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true))
+                    break
+                case 3:
+                    bilist = bilist.sort((a, b) => totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true) - totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true))
+                    break
+            }
+
+            bi.itemId = bilist[0].definition.item.id
+            bi.spriteId = bilist[0].definition.item.graphicParameters.gfxId
+            newBuildList.push(bi)
+        })
+
+        setBuildItems(newBuildList)
+    }
+
     return (
         <section className="p-4">
             <header>
@@ -128,14 +169,23 @@ SECOND_WEAPON.png
 
             <section className="py-2">
                 <div className="flex gap-2">
-                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center">
+                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center" onClick={() => { createBuild(); console.log(buildItems) }}>
                         <p className="text-white">Crear</p>
                     </div>
                     {
                         buildItems.map(it => {
                             return (
                                 <figure className="bg-[#333] cursor-pointer rounded-md transition-all duration-300 hover:bg-[#555]">
-                                    <img className="size-10 md:size-15 lg:size-18 xl:size-18" src={`https://tmktahu.github.io/WakfuAssets/equipmentDefaults/${it.name}.png`} alt={`${it.name.toLowerCase()} placeholder`} />
+                                    {
+                                        it.itemId >= 0 && (
+                                            <img className="size-10 md:size-15 lg:size-18 xl:size-18" src={`https://vertylo.github.io/wakassets/items/${it.spriteId}.png`} alt={`${it.name.toLowerCase()} placeholder`} />
+                                        )
+                                    }
+                                    {
+                                        it.itemId == -1 && (
+                                            <img className="size-10 md:size-15 lg:size-18 xl:size-18" src={`https://tmktahu.github.io/WakfuAssets/equipmentDefaults/${it.name}.png`} alt={`${it.name.toLowerCase()} placeholder`} />
+                                        )
+                                    }
                                 </figure>
                             )
                         })
@@ -435,6 +485,7 @@ SECOND_WEAPON.png
                                 {
                                     requirement && (
                                         <div className="bg-slate-600/15 rounded-md p-2">
+                                            <h3 className="text-lg font-semibold">Requisitos</h3>
                                             <p className="px-1 text-red-500">{(requirement.lower ? statNames[requirement.stat] + " =< " + requirement.lower:"")}</p>
                                         </div>
                                     )
