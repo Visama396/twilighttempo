@@ -528,6 +528,11 @@ SECOND_WEAPON.png
                                             )
                                         }
                                         {
+                                            totalDamage(eqf, lvl, [132]) > 0 && (
+                                                <p className="px-1 text-red-500">Fuego {totalDamage(eqf, lvl, [132])}</p>
+                                            )
+                                        }
+                                        {
                                             totalDamage(eqf, lvl, [130]) > 0 && (
                                                 <p className="px-1 text-red-500">(4) Elemental {totalDamage(eqf, lvl, [130])}</p>
                                             )
