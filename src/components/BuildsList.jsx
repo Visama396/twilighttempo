@@ -199,7 +199,7 @@ SECOND_WEAPON.png
                 const level = b.definition.item.level;
                 return acc + (
                     [0,1].includes(filterSort.id)
-                    ? totalDamage(effects, level, actionsDMG, showTotal)
+                    ? totalDamage(effects, level, actionsDMG, showTotal, false)
                     : totalDefense(effects, level, actionsDEF, true)
                 );
             }, 0);

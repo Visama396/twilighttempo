@@ -21,7 +21,19 @@ const thirdParam = (effectParams, level) => {
     return effectParams[4] + effectParams[5] * level
 }
 
-const totalDamage = (effects, level, actions, total = false) => {
+const totalDamage = (effects, level, actions, total = false, oldFunc = true) => {
+    if (oldFunc) {
+        const filteredEffects = effects.filter(effect => actions.includes(effect.effect.definition.actionId))
+        if (filteredEffects.length > 0) {
+            return filteredEffects.reduce((sum, effect) => {
+                const fp = firstParam(effect.effect.definition.params, level)
+                return sum + (effect.effect.definition.actionId == 120 && total? fp*4: effect.effect.definition.actionId == 1068 && total? fp*amountElements(effects, level, 1068): fp)
+            }, 0)
+        }
+    
+        return 0
+    }
+
     const dmgActionMap = {
         1052: 1,
         1053: 1,
@@ -43,17 +55,6 @@ const totalDamage = (effects, level, actions, total = false) => {
         130: -1,
         132: -1,
     }
-    
-    /*
-    const filteredEffects = effects.filter(effect => actions.includes(effect.effect.definition.actionId))
-    if (filteredEffects.length > 0) {
-        return filteredEffects.reduce((sum, effect) => {
-            const fp = firstParam(effect.effect.definition.params, level)
-            return sum + (effect.effect.definition.actionId == 120 && total? fp*4: effect.effect.definition.actionId == 1068 && total? fp*amountElements(effects, level, 1068): fp)
-        }, 0)
-    }
-
-    return 0*/
 
     return effects.reduce((sum, effect) => {
         const def = effect.effect.definition
