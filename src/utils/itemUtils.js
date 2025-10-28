@@ -54,4 +54,10 @@ const amountElements = (effects, level, action) => {
     return 0
 }
 
-export { searchItem, totalDamage, totalDefense, amountElements, firstParam }
+const searchId = (id) => {
+    if (id == -1) return null
+    const item = items.find(i => i.definition.item.id == id)
+    return item
+}
+
+export { searchItem, totalDamage, totalDefense, amountElements, firstParam, searchId }

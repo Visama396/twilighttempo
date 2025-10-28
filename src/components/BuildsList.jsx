@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { searchItem, totalDamage, totalDefense, amountElements, firstParam } from "../utils/itemUtils"
+import { searchItem, totalDamage, totalDefense, amountElements, firstParam, searchId } from "../utils/itemUtils"
 import LevelFilter from "./LevelFilter"
 import ItemFilter from "./ItemFilter"
 import SortFilter from "./SortFilter"
@@ -129,37 +129,138 @@ SECOND_WEAPON.png
     }
 
     const createBuild = () => {
-        console.log("Creating build")
-        let newBuildList = []
+        console.log("Creating optimized build");
+    
+        // Variables globales
+        const MAX_CANDIDATES = 5; // número de candidatos por slot a considerar
+        const buildCandidates = [];
+    
+        // 1️⃣ Generar los candidatos por slot
         buildItems.forEach(bi => {
-            let bilist = searchItem(filterLevel, bi.id, [4,5,6,7])
-            bilist = bilist.filter( i => {
-                const damageEffects = i.definition.equipEffects.filter(e => actionsDMG.includes(e.effect.definition.actionId))
-                return (damageEffects.length > 0 && damageEffects.every(e => filterDamages.includes(e.effect.definition.actionId)))
-            })
-
+            let bilist = searchItem(filterLevel, bi.id, [4, 5, 6, 7]);
+    
+            // Filtrar por tipo de daño
+            bilist = bilist.filter(i => {
+                const damageEffects = i.definition.equipEffects.filter(e =>
+                    actionsDMG.includes(e.effect.definition.actionId)
+                );
+                return (
+                    damageEffects.length > 0 &&
+                    damageEffects.every(e => filterDamages.includes(e.effect.definition.actionId))
+                );
+            });
+    
+            // Ordenar según criterio
             switch (filterSort.id) {
-                case 0: 
-                    bilist = bilist.sort((a, b) => totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal) - totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal))
-                    break
+                case 0:
+                    bilist.sort((a, b) =>
+                        totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal) -
+                        totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal)
+                    );
+                    break;
                 case 1:
-                    bilist = bilist.sort((a, b) => totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal) - totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal))
-                    break
+                    bilist.sort((a, b) =>
+                        totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal) -
+                        totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal)
+                    );
+                    break;
                 case 2:
-                    bilist = bilist.sort((a, b) => totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true) - totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true))
-                    break
+                    bilist.sort((a, b) =>
+                        totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true) -
+                        totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true)
+                    );
+                    break;
                 case 3:
-                    bilist = bilist.sort((a, b) => totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true) - totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true))
-                    break
+                    bilist.sort((a, b) =>
+                        totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true) -
+                        totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true)
+                    );
+                    break;
             }
-
-            bi.itemId = bilist[0].definition.item.id
-            bi.spriteId = bilist[0].definition.item.graphicParameters.gfxId
-            newBuildList.push(bi)
-        })
-
-        setBuildItems(newBuildList)
-    }
+    
+            buildCandidates.push({
+                slot: bi,
+                items: bilist.slice(0, MAX_CANDIDATES) // solo los mejores N
+            });
+        });
+    
+        // 2️⃣ Buscar la mejor combinación posible (con backtracking)
+        let bestBuild = null;
+        let bestScore = -Infinity;
+    
+        const usedRingIds = new Set();
+        let usedEpic = false;
+        let usedRelic = false;
+    
+        const evaluateBuild = (build) => {
+            // Calcular daño o defensa total
+            const total = build.reduce((acc, b) => {
+                const effects = b.definition.equipEffects;
+                const level = b.definition.item.level;
+                return acc + (
+                    [0,1].includes(filterSort.id)
+                    ? totalDamage(effects, level, actionsDMG, showTotal)
+                    : totalDefense(effects, level, actionsDEF, true)
+                );
+            }, 0);
+    
+            return total;
+        };
+    
+        const backtrack = (index, currentBuild, usedEpicFlag, usedRelicFlag, ringSet) => {
+            if (index === buildCandidates.length) {
+                const score = evaluateBuild(currentBuild);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestBuild = currentBuild.map(b => b);
+                }
+                return;
+            }
+    
+            const { slot, items } = buildCandidates[index];
+    
+            for (const item of items) {
+                const rarity = item.definition.item.baseParameters.rarity;
+                const itemId = item.definition.item.id;
+    
+                // Rechazar si rompe restricciones
+                if (slot.id.includes(103) && ringSet.has(itemId)) continue;
+                if (rarity === 7 && usedEpicFlag) continue;
+                if (rarity === 5 && usedRelicFlag) continue;
+    
+                // Crear nuevos flags/copies para siguiente nivel
+                const newRings = new Set(ringSet);
+                const newUsedEpic = usedEpicFlag || rarity === 7;
+                const newUsedRelic = usedRelicFlag || rarity === 5;
+                if (slot.id.includes(103)) newRings.add(itemId);
+    
+                backtrack(
+                    index + 1,
+                    [...currentBuild, item],
+                    newUsedEpic,
+                    newUsedRelic,
+                    newRings
+                );
+            }
+        };
+    
+        backtrack(0, [], usedEpic, usedRelic, usedRingIds);
+    
+        // 3️⃣ Construir la build final con los ítems elegidos
+        const newBuildList = buildItems.map((bi, idx) => {
+            const chosen = bestBuild?.[idx];
+            if (!chosen) return { ...bi, itemId: -1, spriteId: -1 };
+            return {
+                ...bi,
+                itemId: chosen.definition.item.id,
+                spriteId: chosen.definition.item.graphicParameters.gfxId
+            };
+        });
+    
+        console.log("✅ Best score:", bestScore);
+        setBuildItems(newBuildList);
+    };
+    
 
     return (
         <section className="p-4">
@@ -169,13 +270,16 @@ SECOND_WEAPON.png
 
             <section className="py-2">
                 <div className="flex gap-2">
-                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center" onClick={() => { createBuild(); console.log(buildItems) }}>
+                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center" onClick={() => { createBuild() }}>
                         <p className="text-white">Crear</p>
                     </div>
                     {
                         buildItems.map(it => {
+                            const item = searchId(it.itemId)
+                            let rarity = -1
+                            if (item) rarity = item.definition.item.baseParameters.rarity
                             return (
-                                <figure className="bg-[#333] cursor-pointer rounded-md transition-all duration-300 hover:bg-[#555]">
+                                <figure className={`bg-[#333] cursor-pointer rounded-md bg-gradient-to-br ${rarityGradients[rarity] || "from-slate-500 to-[#222]"}`}>
                                     {
                                         it.itemId >= 0 && (
                                             <img className="size-10 md:size-15 lg:size-18 xl:size-18" src={`https://vertylo.github.io/wakassets/items/${it.spriteId}.png`} alt={`${it.name.toLowerCase()} placeholder`} />
@@ -214,32 +318,36 @@ SECOND_WEAPON.png
                 </div>
                 <div className="grid grid-cols-2 lg:flex gap-2 text-white">
                     <div className="bg-[#333] p-2 flex gap-1">
+                        <label htmlFor="all">Todos los dominios</label>
+                        <input type="checkbox" name="all" id="all" checked={filterDamages.includes(1068) || filterDamages.includes(120) || filterDamages.includes(1052) || filterDamages.includes(1053) || filterDamages.includes(149) || filterDamages.includes(1055) || filterDamages.includes(180) || filterDamages.includes(26)} onChange={() => { toggleDamage([1068,120,1052,1053,149,1055,180,26]) }} />
+                    </div>
+                    <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="elemental">Dominio Elemental</label>
                         <input type="checkbox" name="elemental" id="elemental" checked={filterDamages.includes(1068) || filterDamages.includes(120)} onChange={() => {toggleDamage([1068, 120])}} />
                     </div>
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="melee">Dominio Melee</label>
-                        <input type="checkbox" name="melee" id="melee" checked={filterDamages.includes(1052)} onClick={() => {toggleDamage([1052])}} />
+                        <input type="checkbox" name="melee" id="melee" checked={filterDamages.includes(1052)} onChange={() => {toggleDamage([1052])}} />
                     </div>
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="distance">Dominio Distancia</label>
-                        <input type="checkbox" name="distance" id="distance" checked={filterDamages.includes(1053)} onClick={() => {toggleDamage([1053])}} />
+                        <input type="checkbox" name="distance" id="distance" checked={filterDamages.includes(1053)} onChange={() => {toggleDamage([1053])}} />
                     </div>
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="crit">Dominio Crítico</label>
-                        <input type="checkbox" name="crit" id="crit" checked={filterDamages.includes(149)} onClick={() => {toggleDamage([149])}} />
+                        <input type="checkbox" name="crit" id="crit" checked={filterDamages.includes(149)} onChange={() => {toggleDamage([149])}} />
                     </div>
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="zerk">Dominio Berserker</label>
-                        <input type="checkbox" name="zerk" id="zerk" checked={filterDamages.includes(1055)} onClick={() => {toggleDamage([1055])}} />
+                        <input type="checkbox" name="zerk" id="zerk" checked={filterDamages.includes(1055)} onChange={() => {toggleDamage([1055])}} />
                     </div>
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="rear">Dominio Espalda</label>
-                        <input type="checkbox" name="rear" id="rear" checked={filterDamages.includes(180)} onClick={() => {toggleDamage([180])}} />
+                        <input type="checkbox" name="rear" id="rear" checked={filterDamages.includes(180)} onChange={() => {toggleDamage([180])}} />
                     </div>
                     <div className="bg-[#333] p-2 flex gap-1">
                         <label htmlFor="heal">Dominio Cura</label>
-                        <input type="checkbox" name="heal" id="heal" checked={filterDamages.includes(26)} onClick={() => {toggleDamage([26])}} />
+                        <input type="checkbox" name="heal" id="heal" checked={filterDamages.includes(26)} onChange={() => {toggleDamage([26])}} />
                     </div>
                 </div>
                 
