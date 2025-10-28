@@ -2,6 +2,7 @@ import { useState } from "react"
 
 export default function SortFilter({ defaultSort, setFilterSort }) {
     const [selectedSort, setSelectedSort] = useState(defaultSort)
+    const [showDrop, setShowDrop] = useState(false)
     const sortFilters = [
         {id: 0, name: "Dominios ↑"},
         {id: 1, name: "Dominios ↓"},
@@ -10,9 +11,9 @@ export default function SortFilter({ defaultSort, setFilterSort }) {
     ]
 
     return (
-        <div className="text-white relative group cursor-pointer">
+        <div className="text-white relative cursor-pointer" onClick={() => { setShowDrop(!showDrop) }}>
             <span className="px-1 text-center rounded-md bg-[#555]">{selectedSort.name}</span>
-            <div className="w-35 absolute top-5 left-[-10px] z-20 bg-[#333] px-3 py-1 gap-1 group-hover:flex flex-col items-center hidden rounded-md shadow-md">
+            <div className={`w-35 absolute top-5 left-[-10px] z-20 bg-[#333] px-3 py-1 gap-1 ${showDrop?"flex":"hidden"} flex-col items-center rounded-md shadow-md`}>
                 {
                     sortFilters.map(item => {
                         return (

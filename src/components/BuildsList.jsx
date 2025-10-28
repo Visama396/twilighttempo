@@ -312,7 +312,7 @@ SECOND_WEAPON.png
                         <SortFilter defaultSort={filterSort} setFilterSort={setFilterSort} />
                     </div>
                     <div className="bg-[#333] flex p-2 gap-2">
-                        <span className="text-white">Mostrar dominios totales</span>
+                        <label htmlFor="showTotal" className="text-white">Mostrar dominios totales</label>
                         <input type="checkbox" name="showTotal" id="showTotal" checked={showTotal} onChange={() => {setShowTotal(!showTotal)}} />
                     </div>
                 </div>

@@ -2,6 +2,7 @@ import { useState } from "react"
 
 export default function ItemFilter({ defaultItem, setFilterItem }) {
     const [selectedItem, setSelectedItem] = useState(defaultItem)
+    const [showDrop, setShowDrop] = useState(false)
     const itemFilters = [
         {id: [134], name: "Casco"},
         {id: [120], name: "Amuleto"},
@@ -18,9 +19,9 @@ export default function ItemFilter({ defaultItem, setFilterItem }) {
     ]
 
     return (
-        <div className="text-white relative group cursor-pointer">
+        <div className="text-white relative cursor-pointer" onClick={() => { setShowDrop(!showDrop) }}>
             <span className="px-1 text-center rounded-md bg-[#555]">{selectedItem.name}</span>
-            <div className="absolute top-5 z-20 bg-[#333] px-3 py-1 gap-1 group-hover:flex flex-col items-center hidden rounded-sm shadow-md w-45">
+            <div className={`absolute top-5 z-20 bg-[#333] px-3 py-1 gap-1 ${showDrop? "flex":"hidden"} flex-col items-center rounded-sm shadow-md w-45`}>
                 {
                     itemFilters.map(item => {
                         return (
