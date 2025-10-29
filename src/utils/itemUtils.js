@@ -21,8 +21,8 @@ const thirdParam = (effectParams, level) => {
     return effectParams[4] + effectParams[5] * level
 }
 
-const totalDamage = (effects, level, actions, total = false, oldFunc = true) => {
-    if (oldFunc) {
+const totalDamage = (effects, level, actions, total = false) => {
+    if (actions.length > 0) {
         const filteredEffects = effects.filter(effect => actions.includes(effect.effect.definition.actionId))
         if (filteredEffects.length > 0) {
             return filteredEffects.reduce((sum, effect) => {
@@ -30,7 +30,7 @@ const totalDamage = (effects, level, actions, total = false, oldFunc = true) => 
                 return sum + (effect.effect.definition.actionId == 120 && total? fp*4: effect.effect.definition.actionId == 1068 && total? fp*amountElements(effects, level, 1068): fp)
             }, 0)
         }
-    
+
         return 0
     }
 

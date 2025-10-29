@@ -64,6 +64,36 @@ export default function BuildsList() {
             name: "BELT",
             spriteId: -1,
             itemId: -1
+        },
+        {
+            id: [108,101,110,111,113,114,115,117,223,253,254],
+            name: "FIRST_WEAPON",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [112,189],
+            name: "SECOND_WEAPON",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [646],
+            name: "ACCESSORY",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [611],
+            name: "MOUNT",
+            spriteId: -1,
+            itemId: -1
+        },
+        {
+            id: [582],
+            name: "PET",
+            spriteId: -1,
+            itemId: -1
         }
     ])
 
@@ -77,14 +107,6 @@ export default function BuildsList() {
         "MP": "PM",
         "WP": "PW"
     }
-
-    /**
-     * ACCESSORY.png
-FIRST_WEAPON.png
-MOUNT.png
-PET.png
-SECOND_WEAPON.png
-     */
 
     const rarityGradients = {
         4: "from-yellow-400 via-[#222] to-[#222]",
@@ -128,7 +150,7 @@ SECOND_WEAPON.png
             break
     }
 
-    const createBuild = () => {
+    /*const createBuild = () => {
         console.log("Creating optimized build");
     
         // Variables globales
@@ -154,14 +176,14 @@ SECOND_WEAPON.png
             switch (filterSort.id) {
                 case 0:
                     bilist.sort((a, b) =>
-                        totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal) -
-                        totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal)
+                        totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal) -
+                        totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal)
                     );
                     break;
                 case 1:
                     bilist.sort((a, b) =>
-                        totalDamage(a.definition.equipEffects, a.definition.item.level, actionsDMG, showTotal) -
-                        totalDamage(b.definition.equipEffects, b.definition.item.level, actionsDMG, showTotal)
+                        totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal) -
+                        totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal)
                     );
                     break;
                 case 2:
@@ -199,7 +221,7 @@ SECOND_WEAPON.png
                 const level = b.definition.item.level;
                 return acc + (
                     [0,1].includes(filterSort.id)
-                    ? totalDamage(effects, level, actionsDMG, showTotal, false)
+                    ? totalDamage(effects, level, [], showTotal, false)
                     : totalDefense(effects, level, actionsDEF, true)
                 );
             }, 0);
@@ -259,7 +281,110 @@ SECOND_WEAPON.png
     
         console.log("✅ Best score:", bestScore);
         setBuildItems(newBuildList);
-    };
+    }*/
+
+    const createBuild = () => {
+        console.log("Creating build")
+        
+        let newBuildList = []
+        let usedRarities = { epic: false, relic: false }
+        let usedRings = []
+        let usedTwoHanded = false
+        let usedItemIds = []
+
+        buildItems.forEach(bi => {
+            if (usedTwoHanded && bi.name === "FIRST_WEAPON" || bi.name === "SECOND_WEAPON") {
+                console.log(`Skipping ${bi.name} because two-handed weapon is equipped.`)
+                newBuildList.push(bi)
+                return
+            }
+
+            let bilist = searchItem(filterLevel, bi.id, [4,5,6,7])
+            
+            bilist = bilist.filter(i => {
+                const damageEffects = i.definition.equipEffects.filter(e => 
+                    actionsDMG.includes(e.effect.definition.actionId)
+                )
+                return (
+                    damageEffects.length > 0 && damageEffects.every(e => 
+                        filterDamages.includes(e.effect.definition.actionId)
+                    )
+                )
+            })
+
+            if (bilist.length === 0) {
+                newBuildList.push(bi)
+                return
+            }
+
+            switch (filterSort.id) {
+                case 0:
+                    bilist.sort(
+                        (a, b) =>
+                            totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal) -
+                            totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal)
+                    );
+                    break;
+                case 1:
+                    bilist.sort(
+                        (a, b) =>
+                            totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal) -
+                            totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal)
+                    );
+                    break;
+                case 2:
+                    bilist.sort(
+                        (a, b) =>
+                            totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true) -
+                            totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true)
+                    );
+                    break;
+                case 3:
+                    bilist.sort(
+                        (a, b) =>
+                            totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true) -
+                            totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true)
+                    );
+                    break;
+            }
+
+            const bestRelic = bilist.find(i => i.definition.item.baseParameters.rarity === 5 && !usedRarities.relic)
+            const bestEpic = bilist.find(i => i.definition.item.baseParameters.rarity === 7 && !usedRarities.epic)
+
+            let chosenItem = null
+            if (bestEpic) {
+                chosenItem = bestRelic
+                usedRarities.relic = true
+            } else if (bestEpic) {
+                chosenItem = bestEpic
+                usedRarities.epic = true
+            } else {
+                chosenItem = bilist.find(i => !usedItemIds.includes(i.definition.item.id))
+            }
+            if (!chosenItem) {
+                newBuildList.push(bi)
+                return
+            }
+
+            const weaponType = chosenItem.definiion.item.type.name.toLowerCase()
+
+            if (bi.name === "LEFT_HAND" || bi.name === "RIGHT_HAND") {
+                if (usedRings.includes(chosenItem.definition.item.id)) {
+                    const altRing = bilist.find(i => !usedRings.includes(i.definition.item.id))
+                    if (altRing) chosenItem = altRing
+                }
+                usedRings.push(chosenItem.definition.item.id)
+            }
+
+            bi.itemId = chosenItem.definition.item.id
+            bi.spriteId = chosenItem.definition.item.graphicParameters.gfxId
+            usedItemIds.push(chosenItem.definition.item.id)
+
+            newBuildList.push(bi)
+        })
+
+        setBuildItems(newBuildList)
+    }
     
 
     return (
@@ -270,7 +395,7 @@ SECOND_WEAPON.png
 
             <section className="py-2">
                 <div className="flex gap-2">
-                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center" onClick={() => { createBuild() }}>
+                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center" onClick={() => { /*createBuild()*/ }}>
                         <p className="text-white">Crear</p>
                     </div>
                     {
