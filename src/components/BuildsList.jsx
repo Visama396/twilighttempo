@@ -3,6 +3,7 @@ import { searchItem, totalDamage, totalDefense, amountElements, firstParam, sear
 import LevelFilter from "./LevelFilter"
 import ItemFilter from "./ItemFilter"
 import SortFilter from "./SortFilter"
+import { Wrench, Menu } from "lucide-react"
 
 export default function BuildsList() {
     const [filterLevel, setFilterLevel] = useState(245)
@@ -150,7 +151,7 @@ export default function BuildsList() {
             break
     }
 
-    /*const createBuild = () => {
+    const createBuild = () => {
         console.log("Creating optimized build");
     
         // Variables globales
@@ -281,122 +282,202 @@ export default function BuildsList() {
     
         console.log("✅ Best score:", bestScore);
         setBuildItems(newBuildList);
-    }*/
-
-    const createBuild = () => {
-        console.log("Creating build")
-        
-        let newBuildList = []
-        let usedRarities = { epic: false, relic: false }
-        let usedRings = []
-        let usedTwoHanded = false
-        let usedItemIds = []
-
-        buildItems.forEach(bi => {
-            if (usedTwoHanded && bi.name === "FIRST_WEAPON" || bi.name === "SECOND_WEAPON") {
-                console.log(`Skipping ${bi.name} because two-handed weapon is equipped.`)
-                newBuildList.push(bi)
-                return
-            }
-
-            let bilist = searchItem(filterLevel, bi.id, [4,5,6,7])
-            
-            bilist = bilist.filter(i => {
-                const damageEffects = i.definition.equipEffects.filter(e => 
-                    actionsDMG.includes(e.effect.definition.actionId)
-                )
-                return (
-                    damageEffects.length > 0 && damageEffects.every(e => 
-                        filterDamages.includes(e.effect.definition.actionId)
-                    )
-                )
-            })
-
-            if (bilist.length === 0) {
-                newBuildList.push(bi)
-                return
-            }
-
-            switch (filterSort.id) {
-                case 0:
-                    bilist.sort(
-                        (a, b) =>
-                            totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal) -
-                            totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal)
-                    );
-                    break;
-                case 1:
-                    bilist.sort(
-                        (a, b) =>
-                            totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal) -
-                            totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal)
-                    );
-                    break;
-                case 2:
-                    bilist.sort(
-                        (a, b) =>
-                            totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true) -
-                            totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true)
-                    );
-                    break;
-                case 3:
-                    bilist.sort(
-                        (a, b) =>
-                            totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true) -
-                            totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true)
-                    );
-                    break;
-            }
-
-            const bestRelic = bilist.find(i => i.definition.item.baseParameters.rarity === 5 && !usedRarities.relic)
-            const bestEpic = bilist.find(i => i.definition.item.baseParameters.rarity === 7 && !usedRarities.epic)
-
-            let chosenItem = null
-            if (bestEpic) {
-                chosenItem = bestRelic
-                usedRarities.relic = true
-            } else if (bestEpic) {
-                chosenItem = bestEpic
-                usedRarities.epic = true
-            } else {
-                chosenItem = bilist.find(i => !usedItemIds.includes(i.definition.item.id))
-            }
-            if (!chosenItem) {
-                newBuildList.push(bi)
-                return
-            }
-
-            const weaponType = chosenItem.definiion.item.type.name.toLowerCase()
-
-            if (bi.name === "LEFT_HAND" || bi.name === "RIGHT_HAND") {
-                if (usedRings.includes(chosenItem.definition.item.id)) {
-                    const altRing = bilist.find(i => !usedRings.includes(i.definition.item.id))
-                    if (altRing) chosenItem = altRing
-                }
-                usedRings.push(chosenItem.definition.item.id)
-            }
-
-            bi.itemId = chosenItem.definition.item.id
-            bi.spriteId = chosenItem.definition.item.graphicParameters.gfxId
-            usedItemIds.push(chosenItem.definition.item.id)
-
-            newBuildList.push(bi)
-        })
-
-        setBuildItems(newBuildList)
     }
+
+    const TWO_HANDED_TYPES = new Set([101, 111, 114, 117, 223, 253]);
+const OFFHAND_SLOT_NAMES = new Set(["SECOND_WEAPON"]);
+
+const chooseBestWeaponSetup = (weapons, offhands) => {
     
+    const best2H = weapons
+        .filter(i => TWO_HANDED_TYPES.has(i.definition.item.baseParameters.itemTypeId))
+        .sort((a, b) =>
+            totalDamage(b.definition.equipEffects, b.definition.item.level, [], true) -
+            totalDamage(a.definition.equipEffects, a.definition.item.level, [], true)
+        )[0];
+
+    const best1H = weapons
+        .filter(i => !TWO_HANDED_TYPES.has(i.definition.item.baseParameters.itemTypeId))
+        .sort((a, b) =>
+            totalDamage(b.definition.equipEffects, b.definition.item.level, [], true) -
+            totalDamage(a.definition.equipEffects, a.definition.item.level, [], true)
+        )[0];
+
+    const bestOffhand = offhands
+        .sort((a, b) =>
+            totalDamage(b.definition.equipEffects, b.definition.item.level, [], true) -
+            totalDamage(a.definition.equipEffects, a.definition.item.level, [], true)
+        )[0];
+
+    if (!best2H) return { type: "1H_SET", first: best1H, second: bestOffhand };
+    if (!best1H || !bestOffhand) return { type: "2H", first: best2H, second: null };
+
+    const dmg2H = totalDamage(best2H.definition.equipEffects, best2H.definition.item.level, [], true);
+    const dmg1H = totalDamage(best1H.definition.equipEffects, best1H.definition.item.level, [], true);
+    const dmgOffhand = totalDamage(bestOffhand.definition.equipEffects, bestOffhand.definition.item.level, [], true);
+
+    if (dmg1H + dmgOffhand > dmg2H) {
+        return { type: "1H_SET", first: best1H, second: bestOffhand };
+    }
+
+    return { type: "2H", first: best2H, second: null };
+};
+
+const createBuild2 = () => {
+    console.log("Creating build");
+
+    let newBuildList = [];
+    let usedRarities = { epic: false, relic: false };
+    let usedRings = [];
+    let usedItemIds = [];
+    let usedTwoHanded = false;
+
+    // --- RECOGER LISTA PREVIA DE ARMAS Y OFFHANDS ---
+    let weaponCandidates = [];
+    let offhandCandidates = [];
+
+    buildItems.forEach(bi => {
+        if (bi.name === "FIRST_WEAPON") {
+            weaponCandidates = searchItem(filterLevel, bi.id, [4]);
+        }
+        if (bi.name === "SECOND_WEAPON") {
+            offhandCandidates = searchItem(filterLevel, bi.id, [4]);
+        }
+    });
+
+    // --- DECIDIR QUÉ COMBINACIÓN ES MEJOR ---
+    const weaponSetup = chooseBestWeaponSetup(weaponCandidates, offhandCandidates);
+
+    if (weaponSetup.type === "2H") usedTwoHanded = true;
+
+    // --- PROCESAR ITEMS ---
+    buildItems.forEach(bi => {
+
+        if (usedTwoHanded && OFFHAND_SLOT_NAMES.has(bi.name)) {
+            newBuildList.push({ ...bi, itemId: -1, spriteId: -1 });
+            return;
+        }
+
+        let bilist = searchItem(filterLevel, bi.id, [4, 5, 6, 7]);
+
+        bilist = bilist.filter(i => {
+            const dmgEffects = i.definition.equipEffects.filter(e =>
+                actionsDMG.includes(e.effect.definition.actionId)
+            );
+            const r = i.definition.item.baseParameters.rarity
+            if (r === 5 && usedRarities.relic) return false
+            if (r === 7 && usedRarities.epic) return false
+            return (
+                dmgEffects.length === 0 ||
+                dmgEffects.every(e => filterDamages.includes(e.effect.definition.actionId))
+            );
+        });
+
+        if (bilist.length === 0) {
+            newBuildList.push(bi);
+            return;
+        }
+
+        // --- SORT POR DAÑO/DEF ---
+        switch (filterSort.id) {
+            case 0:
+                bilist.sort((a, b) =>
+                    totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal) -
+                    totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal)
+                );
+                break;
+            case 1:
+                bilist.sort((a, b) =>
+                    totalDamage(a.definition.equipEffects, a.definition.item.level, [], showTotal) -
+                    totalDamage(b.definition.equipEffects, b.definition.item.level, [], showTotal)
+                );
+                break;
+            case 2:
+                bilist.sort((a, b) =>
+                    totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true) -
+                    totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true)
+                );
+                break;
+            case 3:
+                bilist.sort((a, b) =>
+                    totalDefense(a.definition.equipEffects, a.definition.item.level, actionsDEF, true) -
+                    totalDefense(b.definition.equipEffects, b.definition.item.level, actionsDEF, true)
+                );
+                break;
+        }
+
+        // --- RESTRICCIÓN DE RAREZAS ÉPICO/RELIQUIA ---
+        const bestRelic = bilist.find(i => i.definition.item.baseParameters.rarity === 5 && !usedRarities.relic);
+        const bestEpic  = bilist.find(i => i.definition.item.baseParameters.rarity === 7 && !usedRarities.epic);
+
+        let chosenItem = null;
+
+        if (bestRelic) {
+            chosenItem = bestRelic;
+            usedRarities.relic = true;
+        } else if (bestEpic) {
+            chosenItem = bestEpic;
+            usedRarities.epic = true;
+        } else {
+            chosenItem = bilist.find(i =>
+                !usedItemIds.includes(i.definition.item.id)
+            );
+        }
+
+        // --- MANEJAR CASO DE ARMAS ---
+        if (bi.name === "FIRST_WEAPON") {
+            chosenItem = weaponSetup.first || chosenItem;
+        }
+
+        if (bi.name === "SECOND_WEAPON") {
+            if (weaponSetup.type === "2H") {
+                chosenItem = null;
+            } else {
+                chosenItem = weaponSetup.second || null;
+            }
+        }
+
+        // --- MANEJO DE ANILLOS ---
+        if (bi.name === "LEFT_HAND" || bi.name === "RIGHT_HAND") {
+            if (chosenItem && usedRings.includes(chosenItem.definition.item.id)) {
+                const alt = bilist.find(i => !usedRings.includes(i.definition.item.id));
+                if (alt) chosenItem = alt;
+            }
+            if (chosenItem) usedRings.push(chosenItem.definition.item.id);
+        }
+
+        if (!chosenItem) {
+            newBuildList.push({ ...bi, itemId: -1, spriteId: -1 });
+            return;
+        }
+
+        bi.itemId = chosenItem.definition.item.id;
+        bi.spriteId = chosenItem.definition.item.graphicParameters.gfxId;
+        usedItemIds.push(chosenItem.definition.item.id);
+
+        newBuildList.push(bi);
+    });
+
+    console.log(newBuildList)
+    setBuildItems(newBuildList);
+};
 
     return (
         <section className="p-4">
+            <nav>
+                <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-5 md:size-10 lg-size-15 xl:size-15 flex justify-center items-center" onClick={() => {}}>
+                    <Menu size={24} color="white" />
+                </div>
+            </nav>
+
             <header>
                 <h1 className="text-white text-3xl">UwUConstructor de wuwconjuntos</h1>
             </header>
 
             <section className="py-2">
                 <div className="flex gap-2">
-                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center" onClick={() => { /*createBuild()*/ }}>
-                        <p className="text-white">Crear</p>
+                    <div className="bg-[#333] cursor-pointer rounded-md transition-all duration-100 hover:bg-[#555] size-10 md:size-15 lg:size-18 xl:size-18 flex justify-center items-center" onClick={() => { createBuild2() }}>
+                        <Wrench size={32} color="white" />
                     </div>
                     {
                         buildItems.map(it => {
