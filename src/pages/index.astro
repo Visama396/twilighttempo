@@ -3,8 +3,19 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Twilight Tempo">
-	<nav>
-		<a href="/wakfu" class="text-white">Wakfu</a>
-		<a href="/sets" class="text-white">Sets</a>
-	</nav>
+	<header>
+		<h1 class="text-white text-4xl font-bold p-6">Twilight Tempo</h1>
+	</header>
+	<div class="px-6 flex gap-4">
+		<div class="bg-[#555] p-4 shadow-lg flex flex-col text-white">
+			<h2 class="text-xl mb-2">Wakfu</h2>
+			<a href="/wakfu" class="hover:text-[#DDD] transition-all duration-200">Progreso del mes</a>
+			<a href="/sets" class="hover:text-[#DDD] transition-all duration-200">Creador de sets</a>
+			<a href="/guides" class="hover:text-[#DDD] transition-all duration-200">Guías de mazmorras</a>
+		</div>
+		<div class="bg-[#555] p-4 shadow-lg flex flex-col text-white">
+			<h2 class="text-xl mb-2">Satisfactory</h2>
+			<a href="/satis-layouts" class="hover:text-[#DDD] transition-all duration-200">Layouts génericas</a>
+		</div>
+	</div>
 </Layout>
